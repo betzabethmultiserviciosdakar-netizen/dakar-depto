@@ -615,7 +615,10 @@ function render(mes){
     catsSorted.forEach(cat=>{
       const byDay={};
       const seg=D.seguimiento[mes]||{};
-      Object.keys(seg).forEach(f=>{if((seg[f][cat]||0)>0)byDay[f]=seg[f][cat];});
+      Object.keys(seg).forEach(f=>{
+        const v=seg[f]?.cat?.[cat]||0;
+        if(v>0)byDay[f]=v;
+      });
       if(Object.keys(byDay).length) buildLine('line_'+cat,byDay,CAT_COL[cat]);
 
       const vends=(D.porMes[mes]||{})[cat]||{};
@@ -642,7 +645,7 @@ function render(mes){
         fechas.forEach(f=>{
           diasData[f]={};
           const vendDay=(D.seguimiento[mes]?.[f]?.vend?.[cat])||{};
-          Object.entries(vendDay).forEach(([v,n])=>{ diasData[f][v]=n; });
+          Object.entries(vendDay).forEach(([v,n])=>{ if(n>0)diasData[f][v]=n; });
         });
         const vendNames=vendList.map(x=>x[0]);
         const shades=cat==='Detal'?['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4','#CCFBF1','#F0FDFA','#064E3B']:
