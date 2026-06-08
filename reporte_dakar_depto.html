@@ -3,307 +3,308 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reporte Departamentos — Dakar</title>
+<title>Reporte de Ventas Detal — Dakar</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F7F8FA;--bg2:#FFFFFF;--bg3:#EEF0F6;--border:#E2E5EE;
-  --text:#141820;--muted:#6B7280;--muted2:#9CA3AF;
-  --detal:#0F766E;--taller:#92400E;--ml:#1D4ED8;--ap:#6D28D9;
+  --bg:#F4F5F8;--bg2:#FFFFFF;--bg3:#ECEEF3;--border:#DFE2EB;
+  --text:#111827;--muted:#6B7280;--muted2:#9CA3AF;
+  --detal:#0F766E;--taller:#92400E;--ml:#1E40AF;--ap:#6D28D9;
   --green:#059669;--red:#DC2626;--yellow:#D97706;
-  --r:10px;
+  --r:10px;--r2:6px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;}
-.shell{max-width:1140px;margin:0 auto;padding:2rem 1.5rem 5rem;}
+.shell{max-width:1160px;margin:0 auto;padding:2rem 1.5rem 5rem;}
 
-/* Header */
 .hdr{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:1.5rem;border-bottom:2px solid var(--border);margin-bottom:2rem;gap:1rem;flex-wrap:wrap;}
-.hdr-left h1{font-size:22px;font-weight:700;letter-spacing:-.3px;}
-.hdr-left p{font-size:12px;color:var(--muted);margin-top:3px;}
+.hdr h1{font-size:22px;font-weight:700;letter-spacing:-.3px;}
+.hdr p{font-size:12px;color:var(--muted);margin-top:2px;}
 .hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
 .period-sel{display:flex;align-items:center;gap:8px;}
 .period-sel label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
 .period-sel select{font-size:13px;font-weight:500;padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);cursor:pointer;outline:none;}
 .updated{font-size:11px;color:var(--muted);text-align:right;line-height:1.8;}
 
-/* Loading */
-#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;}
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:14px;}
 .spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--detal);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 #loading p{font-size:13px;color:var(--muted);}
-#error-msg{display:none;padding:3rem;text-align:center;color:var(--red);}
+#err{display:none;padding:3rem;text-align:center;color:var(--red);font-size:13px;}
 
 /* Metrics */
-.metric-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:2rem;}
-.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.1rem;}
-.metric-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
-.metric-value{font-size:18px;font-weight:700;line-height:1.2;word-break:break-word;}
-.metric-sub{font-size:11px;color:var(--muted);margin-top:4px;}
-.metric-dev{font-size:11px;margin-top:3px;font-weight:500;}
-.metric-dev.ok{color:var(--green);}
-.metric-dev.warn{color:var(--red);}
+.mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:2rem;}
+.mc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1rem;}
+.mc-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+.mc-val{font-size:18px;font-weight:700;line-height:1.2;word-break:break-word;}
+.mc-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.mc-dev{font-size:11px;margin-top:3px;font-weight:500;}
+.mc-dev.ok{color:var(--green);}
+.mc-dev.warn{color:var(--red);}
 
 /* Tabs */
-.tab-bar{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:1.75rem;flex-wrap:wrap;}
+.tab-bar{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:1.75rem;flex-wrap:wrap;}
 .tab{font-size:13px;font-weight:500;padding:8px 16px;border:none;background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .15s;}
 .tab:hover{color:var(--text);}
 .tab.active{color:var(--text);font-weight:700;border-bottom-color:var(--text);}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
 
-.sec-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:1.75rem 0 .75rem;}
-
-/* Tables */
-.tbl-wrap{overflow-x:auto;margin-bottom:1.5rem;}
-.tbl{width:100%;border-collapse:collapse;font-size:13px;}
-.tbl th{background:var(--bg3);color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:7px 12px;text-align:right;border-bottom:2px solid var(--border);white-space:nowrap;}
-.tbl th:first-child{text-align:left;}
-.tbl td{padding:8px 12px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;}
-.tbl td:first-child{text-align:left;font-weight:500;}
-.tbl tr:hover td{background:var(--bg3);}
-.tbl .total-row td{background:var(--bg3);font-weight:700;border-top:2px solid var(--border);}
-.tbl .zero{color:var(--border);}
-.tbl .subtotal td{background:#F0FDF4;font-weight:600;border-top:1px solid #BBF7D0;color:var(--detal);}
-
-/* Semáforo */
-.sem-verde{color:var(--green);font-weight:600;}
-.sem-rojo{color:var(--red);font-weight:600;}
-.sem-ok::before{content:'🟢 ';}
-.sem-warn::before{content:'🔴 ';}
+.sec{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:1.75rem 0 .75rem;}
 
 /* Charts */
-.chart-wrap{position:relative;width:100%;height:240px;margin-bottom:1.5rem;}
+.chart-wrap{position:relative;width:100%;height:230px;margin-bottom:1.5rem;}
+.chart-wrap-sm{position:relative;width:100%;height:200px;}
 
-/* Seguimiento */
-.sem-blk{margin-bottom:1.75rem;}
-.sem-hdr{display:flex;align-items:baseline;gap:10px;padding:.6rem 1rem;background:var(--bg3);border-radius:8px;margin-bottom:.5rem;flex-wrap:wrap;}
-.sem-hdr strong{font-size:13px;}
+/* Tables */
+.tw{overflow-x:auto;margin-bottom:1.5rem;}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{background:var(--bg3);color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:7px 12px;text-align:right;border-bottom:2px solid var(--border);white-space:nowrap;}
+.tbl th:first-child,.tbl th.l{text-align:left;}
+.tbl td{padding:7px 12px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;font-size:13px;}
+.tbl td.l{text-align:left;}
+.tbl td:first-child{text-align:left;font-weight:500;}
+.tbl tr:hover td{background:var(--bg3);}
+.tbl .tr-total td{background:var(--bg3);font-weight:700;border-top:2px solid var(--border);}
+.tbl .tr-sub td{background:#F0FDF4;font-weight:600;border-top:1px solid #BBF7D0;color:var(--detal);}
+.zero{color:var(--border);}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+.badge.ok{background:#D1FAE5;color:#065F46;}
+.badge.warn{background:#FEE2E2;color:#991B1B;}
+.badge.neu{background:var(--bg3);color:var(--muted);}
+
+/* Semanas */
+.sem-blk{margin-bottom:1.5rem;}
+.sem-hdr{display:flex;align-items:baseline;gap:10px;padding:.55rem 1rem;background:var(--bg3);border-radius:var(--r2);margin-bottom:.5rem;flex-wrap:wrap;}
+.sem-hdr b{font-size:13px;}
 .sem-hdr span{font-size:12px;color:var(--muted);}
-.sem-hdr .sem-tot{margin-left:auto;font-size:13px;font-weight:700;}
+.sem-tot{margin-left:auto;font-size:13px;font-weight:700;}
+
+/* Legend */
 .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
-.legend-dot{width:10px;height:10px;border-radius:2px;}
+.legend-i{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.legend-d{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
 
-/* Devoluciones */
-.dev-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;}
-.dev-badge.ok{background:#D1FAE5;color:#065F46;}
-.dev-badge.warn{background:#FEE2E2;color:#991B1B;}
-
-/* Detailing / Audio cards */
-.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:1.5rem;}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1rem;}
-.card-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
-.card-value{font-size:16px;font-weight:700;}
+/* Cards */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1.5rem;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem;}
+.card-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.card-val{font-size:16px;font-weight:700;}
 .card-sub{font-size:11px;color:var(--muted);margin-top:3px;}
 
-@media(max-width:600px){
-  .metric-row{grid-template-columns:repeat(2,1fr);}
+/* Filter */
+.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap;}
+.filter-row label{font-size:12px;font-weight:600;color:var(--muted);}
+.filter-row select{font-size:13px;padding:5px 10px;border:1.5px solid var(--border);border-radius:var(--r2);background:var(--bg2);color:var(--text);outline:none;cursor:pointer;}
+
+/* Donut */
+.donut-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:center;margin-bottom:1.5rem;}
+.donut-chart{position:relative;height:220px;}
+.donut-legend{display:flex;flex-direction:column;gap:8px;}
+.donut-item{display:flex;align-items:center;gap:8px;font-size:12px;}
+.donut-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+.donut-label{color:var(--text);font-weight:500;}
+.donut-pct{margin-left:auto;color:var(--muted);}
+
+@media(max-width:640px){
+  .mrow{grid-template-columns:repeat(2,1fr);}
   .hdr{flex-direction:column;}
   .hdr-right{align-items:flex-start;}
+  .donut-wrap{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
 <div class="shell">
   <div class="hdr">
-    <div class="hdr-left">
-      <h1>Reporte de Departamentos</h1>
-      <p>Multiservicios Dakar C.A.</p>
+    <div>
+      <h1>Reporte de Ventas</h1>
+      <p>Multiservicios Dakar C.A. — Detal, Taller, ML y AutoParts</p>
     </div>
     <div class="hdr-right">
       <div class="period-sel">
-        <label>Período</label>
+        <label>Periodo</label>
         <select id="mesSelect" onchange="cambiarMes()"><option>Cargando...</option></select>
       </div>
-      <div class="updated" id="updatedLbl"></div>
+      <div class="updated" id="updLbl"></div>
     </div>
   </div>
-
   <div id="loading"><div class="spinner"></div><p>Cargando datos...</p></div>
-  <div id="error-msg"></div>
+  <div id="err"></div>
   <div id="app" style="display:none;"></div>
 </div>
-
 <script>
-const DATA_URL = 'https://script.google.com/macros/s/AKfycbzLm7GcrRP8V6nkCkJ7hC6r58GcqlPRqjL1MTV2YIplRtbaB7QdZt1tv6VoFVwZWXAR/exec';
-
-const CATS = ['Detal','Taller','ML','AutoParts'];
-const CAT_LABEL = {Detal:'Detal',Taller:'Taller',ML:'Mercado Libre',AutoParts:'AutoParts'};
-const CAT_COLOR = {Detal:'#0F766E',Taller:'#92400E',ML:'#1D4ED8',AutoParts:'#6D28D9'};
-const MESES_ES = {'01':'Enero','02':'Febrero','03':'Marzo','04':'Abril','05':'Mayo','06':'Junio','07':'Julio','08':'Agosto','09':'Septiembre','10':'Octubre','11':'Noviembre','12':'Diciembre'};
-
-let ALL_DATA = null;
-
-const fmt = v => '$' + parseFloat(v||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtK = v => { const n=parseFloat(v||0); return n>=1e6?'$'+(n/1e6).toFixed(2)+'M':n>=1000?'$'+Math.round(n/1000)+'K':'$'+Math.round(n); };
-const pct = (a,b) => b>0 ? ((a/b)*100).toFixed(1)+'%' : '—';
-
-function catTotal(porMes, mes, cat) {
-  const vends = (porMes[mes]||{})[cat]||{};
-  return Object.values(vends).reduce((s,v)=>s+v,0);
-}
-
-function mesLabel(m) {
-  const [y,mo] = m.split('-');
-  return (MESES_ES[mo]||mo)+' '+y;
-}
-
-function getSemanaDelMes(fechaStr){
-  const dt=new Date(fechaStr+'T12:00:00');
-  const dow=dt.getDay();
-  if(dow===0)return null;
-  const year=dt.getFullYear(),month=dt.getMonth(),dia=dt.getDate();
-  const primerDow=new Date(year,month,1).getDay();
-  let primerSab;
-  if(primerDow===0) primerSab=7;
-  else if(primerDow===6) primerSab=1;
-  else primerSab=1+(6-primerDow);
-  if(dia<=primerSab)return 1;
-  const primerLunesSem2=primerSab+2;
-  return 2+Math.floor((dia-primerLunesSem2)/7);
-}
-
-function getRangoSem(sem, year, month){
-  const m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  const diasEnMes=new Date(year,month+1,0).getDate();
-  let min=99,max=0;
-  for(let d=1;d<=diasEnMes;d++){
-    const fs=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    if(getSemanaDelMes(fs)===sem){min=Math.min(min,d);max=Math.max(max,d);}
-  }
-  const f0=new Date(year,month,min),f1=new Date(year,month,max);
-  return `${f0.getDate()} ${m[f0.getMonth()]} – ${f1.getDate()} ${m[f1.getMonth()]}`;
-}
-
+const DATA_URL='https://script.google.com/macros/s/AKfycbzTP0kAx2d2R2LxLfQ7zMT1ljgh71duFTANipZfZRdN_76qNw-u1XkQjqyt18bRy5Aa/exec';
+const CATS=['Detal','Taller','ML','AutoParts'];
+const CAT_LBL={Detal:'Detal',Taller:'Taller',ML:'Mercado Libre',AutoParts:'AutoParts'};
+const CAT_COL={Detal:'#0F766E',Taller:'#92400E',ML:'#1E40AF',AutoParts:'#6D28D9'};
+const MESES_ES={'01':'Enero','02':'Febrero','03':'Marzo','04':'Abril','05':'Mayo','06':'Junio','07':'Julio','08':'Agosto','09':'Septiembre','10':'Octubre','11':'Noviembre','12':'Diciembre'};
 const diasEs={'Mon':'Lun','Tue':'Mar','Wed':'Mié','Thu':'Jue','Fri':'Vie','Sat':'Sáb'};
+
+let D=null;
+let CHARTS=[];
+
+const fmt=v=>'$'+parseFloat(v||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtK=v=>{const n=parseFloat(v||0);return n>=1e6?'$'+(n/1e6).toFixed(2)+'M':n>=1000?'$'+Math.round(n/1000)+'K':'$'+Math.round(n);};
 const makeLabel=f=>{const dt=new Date(f+'T12:00:00');return(diasEs[dt.toLocaleDateString('en-US',{weekday:'short'}).slice(0,3)]||'?')+' '+dt.getDate();};
+const mesLabel=m=>{const[y,mo]=m.split('-');return(MESES_ES[mo]||mo)+' '+y;};
 
-let charts = [];
-function destroyCharts(){ charts.forEach(c=>{try{c.destroy();}catch(e){}}); charts=[]; }
+function catTotal(mes,cat){
+  const v=(D.porMes[mes]||{})[cat]||{};
+  return Object.values(v).reduce((s,x)=>s+x,0);
+}
+function devCat(mes,cat){ return D.devMap[mes+'|CAT|'+cat]||0; }
+function devVend(mes,vend){ return D.devMap[mes+'|VEND|'+vend]||0; }
 
-// ── Plugins ──────────────────────────────────────────────────
-const totalLabels = {
-  id:'totalLabels',
-  afterDatasetsDraw(chart){
-    if(!chart.config.options._totales)return;
-    const{ctx}=chart; const tots=chart.config.options._totales;
-    const nDs=chart.data.datasets.length;
-    ctx.save();ctx.font='600 11px DM Sans,sans-serif';ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text').trim()||'#141820';
-    ctx.textAlign='center';ctx.textBaseline='bottom';
-    tots.forEach((tot,i)=>{
-      if(!tot)return;
-      let topY=Infinity;
-      for(let di=0;di<nDs;di++){const m=chart.getDatasetMeta(di);if(m.data[i]&&m.data[i].y<topY)topY=m.data[i].y;}
-      ctx.fillText(fmtK(tot),chart.getDatasetMeta(0).data[i].x,topY-5);
-    });
-    ctx.restore();
+function getSemanaDelMes(f){
+  const dt=new Date(f+'T12:00:00');
+  const dow=dt.getDay(); if(dow===0)return null;
+  const y=dt.getFullYear(),mo=dt.getMonth(),d=dt.getDate();
+  const p=new Date(y,mo,1).getDay();
+  let ps; if(p===0)ps=7; else if(p===6)ps=1; else ps=1+(6-p);
+  if(d<=ps)return 1;
+  return 2+Math.floor((d-ps-2)/7);
+}
+function getRangoSem(sem,y,mo){
+  const m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const dias=new Date(y,mo+1,0).getDate();
+  let mn=99,mx=0;
+  for(let d=1;d<=dias;d++){
+    const fs=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(getSemanaDelMes(fs)===sem){mn=Math.min(mn,d);mx=Math.max(mx,d);}
   }
-};
-
-const segPct = {
-  id:'segPct',
-  afterDatasetsDraw(chart){
-    if(!chart.config.options._totales)return;
-    const{ctx}=chart; const tots=chart.config.options._totales;
-    ctx.save();
-    chart.data.datasets.forEach((ds,di)=>{
-      const meta=chart.getDatasetMeta(di);
-      meta.data.forEach((bar,bi)=>{
-        const v=ds.data[bi]; if(!v||v<1)return;
-        const p=Math.round(v/tots[bi]*100); if(p<6)return;
-        const h=bar.height||0; if(h<18)return;
-        ctx.font='500 10px DM Sans,sans-serif';ctx.fillStyle='rgba(255,255,255,0.9)';
-        ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(p+'%',bar.x,bar.y+h/2);
-      });
-    });
-    ctx.restore();
-  }
-};
-Chart.register(totalLabels,segPct);
-
-function buildStackedBar(id,legId,diasData,vendedores,colors,year,month){
-  const el=document.getElementById(id); if(!el)return;
-  const fechas=Object.keys(diasData).sort();
-  const labels=fechas.map(makeLabel);
-  const tots=fechas.map(f=>Object.values(diasData[f]).reduce((a,b)=>a+b,0));
-  const activeV=vendedores.filter(v=>fechas.some(f=>diasData[f][v]>0));
-  const datasets=activeV.map((v,vi)=>({
-    label:v, data:fechas.map(f=>diasData[f][v]||0),
-    backgroundColor:colors[vi%colors.length], borderRadius:2, stack:'s'
-  }));
-  const legEl=document.getElementById(legId);
-  if(legEl) legEl.innerHTML=activeV.map((v,vi)=>`<span class="legend-item"><span class="legend-dot" style="background:${colors[vi%colors.length]};"></span>${v}</span>`).join('');
-  el.parentElement.style.height=Math.max(180,fechas.length>5?240:200)+'px';
-  const c=new Chart(el,{
-    plugins:[totalLabels,segPct],
-    data:{labels,datasets},
-    options:{_totales:tots,responsive:true,maintainAspectRatio:false,
-      layout:{padding:{top:22}},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;if(!v)return null;return`${ctx.dataset.label}: ${fmt(v)} (${(v/tots[ctx.dataIndex]*100).toFixed(1)}%)`;
-      }}}},
-      scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#6B7280',font:{size:11}}},
-              y:{stacked:true,grid:{color:'rgba(0,0,0,0.06)'},beginAtZero:true,ticks:{color:'#6B7280',font:{size:11},callback:v=>fmtK(v)}}}}
-  });
-  charts.push(c);
+  const f0=new Date(y,mo,mn),f1=new Date(y,mo,mx);
+  return`${f0.getDate()} ${m[f0.getMonth()]} - ${f1.getDate()} ${m[f1.getMonth()]}`;
 }
 
-// ── Render ────────────────────────────────────────────────────
+function destroyCharts(){CHARTS.forEach(c=>{try{c.destroy();}catch(e){}});CHARTS=[];}
+
+// Plugins
+const topLabelPlugin={id:'topLabel',afterDatasetsDraw(chart){
+  if(!chart.config.options._tots)return;
+  const{ctx}=chart;const tots=chart.config.options._tots;
+  const nDs=chart.data.datasets.length;
+  ctx.save();ctx.font='600 11px DM Sans,sans-serif';ctx.fillStyle='#111827';ctx.textAlign='center';ctx.textBaseline='bottom';
+  tots.forEach((t,i)=>{
+    if(!t)return;
+    let topY=Infinity;
+    for(let di=0;di<nDs;di++){const m=chart.getDatasetMeta(di);if(m.data[i]&&m.data[i].y<topY)topY=m.data[i].y;}
+    ctx.fillText(fmtK(t),chart.getDatasetMeta(0).data[i].x,topY-5);
+  });
+  ctx.restore();
+}};
+const segPctPlugin={id:'segPct',afterDatasetsDraw(chart){
+  if(!chart.config.options._tots)return;
+  const{ctx}=chart;const tots=chart.config.options._tots;
+  ctx.save();
+  chart.data.datasets.forEach((ds,di)=>{
+    const meta=chart.getDatasetMeta(di);
+    meta.data.forEach((bar,bi)=>{
+      const v=ds.data[bi];if(!v||v<1)return;
+      const p=Math.round(v/tots[bi]*100);if(p<6)return;
+      const h=bar.height||0;if(h<18)return;
+      ctx.font='500 10px DM Sans,sans-serif';ctx.fillStyle='rgba(255,255,255,0.92)';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(p+'%',bar.x,bar.y+h/2);
+    });
+  });
+  ctx.restore();
+}};
+const hBarLabelPlugin={id:'hBarLabel',afterDatasetsDraw(chart){
+  if(!chart.config.options._hbar)return;
+  const{ctx,data}=chart;
+  const tot=data.datasets[0].data.reduce((a,b)=>a+b,0);
+  const meta=chart.getDatasetMeta(0);
+  ctx.save();ctx.font='500 11px DM Sans,sans-serif';ctx.fillStyle='#6B7280';ctx.textAlign='left';ctx.textBaseline='middle';
+  meta.data.forEach((bar,i)=>{
+    const v=data.datasets[0].data[i];
+    ctx.fillText(`${fmt(v)}   ${(v/tot*100).toFixed(1)}%`,bar.x+8,bar.y);
+  });
+  ctx.restore();
+}};
+Chart.register(topLabelPlugin,segPctPlugin,hBarLabelPlugin);
+
+function buildLine(id,byDay,color){
+  const el=document.getElementById(id);if(!el)return;
+  const fs=Object.keys(byDay).sort();
+  const vals=fs.map(f=>byDay[f]);
+  const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+  const c=new Chart(el,{type:'line',data:{labels:fs.map(makeLabel),datasets:[
+    {label:'Ventas',data:vals,borderColor:color,backgroundColor:color+'18',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,fill:true,tension:0.35},
+    {label:'Promedio',data:Array(vals.length).fill(Math.round(avg)),borderColor:'rgba(107,112,128,0.4)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmt(ctx.parsed.y)}}},
+    scales:{x:{grid:{display:false},ticks:{color:'#6B7280',font:{size:11},maxRotation:45}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#6B7280',font:{size:11},callback:v=>fmtK(v)}}}}});
+  CHARTS.push(c);
+}
+function buildHBar(id,items,colors){
+  const el=document.getElementById(id);if(!el)return;
+  const h=Math.max(180,items.length*42+60);
+  el.parentElement.style.height=h+'px';
+  const c=new Chart(el,{type:'bar',data:{labels:items.map(x=>x[0]),datasets:[{data:items.map(x=>x[1]),backgroundColor:colors,borderRadius:4,barPercentage:.75}]},
+    options:{_hbar:true,indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:220}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.x)}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#6B7280',font:{size:11},callback:v=>fmtK(v)}},y:{grid:{display:false},ticks:{color:'#111827',font:{size:12}}}}}});
+  CHARTS.push(c);
+}
+function buildStacked(id,legId,diasData,vends,colors,tots){
+  const el=document.getElementById(id);if(!el)return;
+  const fs=Object.keys(diasData).sort();
+  const totals=tots||fs.map(f=>Object.values(diasData[f]).reduce((a,b)=>a+b,0));
+  const activeV=vends.filter(v=>fs.some(f=>(diasData[f][v]||0)>0));
+  const datasets=activeV.map((v,vi)=>({label:v,data:fs.map(f=>diasData[f][v]||0),backgroundColor:colors[vi%colors.length],borderRadius:2,stack:'s'}));
+  const legEl=document.getElementById(legId);
+  if(legEl)legEl.innerHTML=activeV.map((v,vi)=>`<span class="legend-i"><span class="legend-d" style="background:${colors[vi%colors.length]};"></span>${v}</span>`).join('');
+  el.parentElement.style.height=Math.max(180,fs.length>5?240:200)+'px';
+  const c=new Chart(el,{plugins:[topLabelPlugin,segPctPlugin],data:{labels:fs.map(makeLabel),datasets},
+    options:{_tots:totals,responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;if(!v)return null;return`${ctx.dataset.label}: ${fmt(v)} (${(v/totals[ctx.dataIndex]*100).toFixed(1)}%)`;
+      }}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#6B7280',font:{size:11}}},y:{stacked:true,grid:{color:'rgba(0,0,0,0.06)'},beginAtZero:true,ticks:{color:'#6B7280',font:{size:11},callback:v=>fmtK(v)}}}}});
+  CHARTS.push(c);
+}
+
+// ── RENDER ────────────────────────────────────────────────────
 function render(mes){
   destroyCharts();
-  const D = ALL_DATA;
-  const porMes = D.porMes||{};
-  const devMap = D.devMap||{};
-  const marcas = D.marcas||{};
-  const detailing = D.detailing||{};
-  const audio = D.audio||{};
-  const seg = D.seguimiento||{};
+  const[y,mo]=mes.split('-');
+  const year=+y,month=+mo-1;
 
-  const [y,mo] = mes.split('-');
-  const year=+y, month=+mo-1;
+  const totCat={},devC={},netoCat={};
+  CATS.forEach(c=>{totCat[c]=catTotal(mes,c);devC[c]=devCat(mes,c);netoCat[c]=totCat[c]-devC[c];});
+  const totalFac=CATS.reduce((s,c)=>s+totCat[c],0);
+  const totalDev=CATS.reduce((s,c)=>s+devC[c],0);
+  const totalNeto=totalFac-totalDev;
 
-  // Totales por cat
-  const totCat={};
-  CATS.forEach(c=>{ totCat[c]=catTotal(porMes,mes,c); });
-  const totalGeneral=CATS.reduce((s,c)=>s+totCat[c],0);
+  document.getElementById('updLbl').innerHTML=
+    `Actualizado: ${new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'})}<br><b>Total neto: ${fmt(totalNeto)}</b>`;
 
-  // Devoluciones por cat
-  const devCat={};
-  CATS.forEach(c=>{ devCat[c]=devMap[mes+'|CAT|'+c]||0; });
-  const devTotal=devMap[mes]||0;
+  // Sort cats by weight
+  const catsSorted=CATS.slice().sort((a,b)=>totCat[b]-totCat[a]);
 
-  // Neto real
-  const netoCat={};
-  CATS.forEach(c=>{ netoCat[c]=totCat[c]-(devCat[c]||0); });
-
-  // Actualizar label
-  document.getElementById('updatedLbl').innerHTML=
-    `Actualizado: ${new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'})}<br><strong>Total: ${fmt(totalGeneral)}</strong>`;
-
-  let html = `
-  <div class="metric-row">
-    ${CATS.map(c=>{
-      const pctDev = totCat[c]>0 ? (devCat[c]/totCat[c]*100).toFixed(1) : '0.0';
-      const devOk = parseFloat(pctDev)<=3;
-      return `<div class="metric">
-        <div class="metric-label">${CAT_LABEL[c]}</div>
-        <div class="metric-value" style="color:${CAT_COLOR[c]}">${fmt(netoCat[c])}</div>
-        <div class="metric-sub">Facturado: ${fmt(totCat[c])}</div>
-        ${devCat[c]>0?`<div class="metric-dev ${devOk?'ok':'warn'}">Dev: -${fmt(devCat[c])} (${pctDev}%)</div>`:''}
+  let html=`<div class="mrow">
+    ${catsSorted.map(c=>{
+      const pd=totCat[c]>0?(devC[c]/totCat[c]*100).toFixed(1):'0.0';
+      const ok=parseFloat(pd)<=3;
+      return`<div class="mc">
+        <div class="mc-lbl">${CAT_LBL[c]}</div>
+        <div class="mc-val" style="color:${CAT_COL[c]}">${fmt(netoCat[c])}</div>
+        <div class="mc-sub">Facturado: ${fmt(totCat[c])}</div>
+        ${devC[c]>0?`<div class="mc-dev ${ok?'ok':'warn'}">Dev: -${fmt(devC[c])} (${pd}%)</div>`:''}
       </div>`;
     }).join('')}
-    <div class="metric">
-      <div class="metric-label">Total neto</div>
-      <div class="metric-value">${fmt(CATS.reduce((s,c)=>s+netoCat[c],0))}</div>
-      <div class="metric-sub">Facturado: ${fmt(totalGeneral)}</div>
-      ${devTotal>0?`<div class="metric-dev ${(devTotal/totalGeneral*100)<=3?'ok':'warn'}">Dev: -${fmt(devTotal)} (${(devTotal/totalGeneral*100).toFixed(1)}%)</div>`:''}
+    <div class="mc">
+      <div class="mc-lbl">Total neto</div>
+      <div class="mc-val">${fmt(totalNeto)}</div>
+      <div class="mc-sub">Facturado: ${fmt(totalFac)}</div>
+      ${totalDev>0?`<div class="mc-dev ${(totalDev/totalFac*100)<=3?'ok':'warn'}">Dev: -${fmt(totalDev)} (${(totalDev/totalFac*100).toFixed(1)}%)</div>`:''}
     </div>
   </div>
 
   <div class="tab-bar">
-    <button class="tab active" onclick="switchTab('resumen',this)">Resumen</button>
+    ${catsSorted.map((c,i)=>`<button class="tab${i===0?' active':''}" onclick="switchTab('cat_${c}',this)">${CAT_LBL[c]}</button>`).join('')}
     <button class="tab" onclick="switchTab('marcas',this)">Marcas</button>
     <button class="tab" onclick="switchTab('detailing',this)">Detailing</button>
     <button class="tab" onclick="switchTab('audio',this)">CarAudio</button>
@@ -311,238 +312,293 @@ function render(mes){
     <button class="tab" onclick="switchTab('devoluciones',this)">Devoluciones</button>
   </div>`;
 
-  // ── TAB: RESUMEN ──
-  html+=`<div class="tab-panel active" id="panel-resumen">`;
-  CATS.forEach(cat=>{
-    const vends = (porMes[mes]||{})[cat]||{};
-    if(!Object.keys(vends).length) return;
-    const devTotCat = devCat[cat]||0;
-    const rows = Object.entries(vends).sort((a,b)=>b[1]-a[1]);
-    html+=`<div class="sec-title">${CAT_LABEL[cat]}</div>
-    <div class="tbl-wrap"><table class="tbl">
-      <thead><tr>
-        <th>Vendedor</th><th>Facturado</th><th>Devuelto</th><th>% Dev</th><th>Neto</th>
-      </tr></thead><tbody>`;
-    rows.forEach(([vend,neto])=>{
-      const dev = devMap[mes+'|'+vend]||0;
-      const neto_real = neto-dev;
-      const pDev = neto>0?(dev/neto*100).toFixed(1):0;
-      const semOk = parseFloat(pDev)<=3;
-      html+=`<tr>
-        <td>${vend}</td>
-        <td>${fmt(neto)}</td>
-        <td>${dev>0?`<span class="sem-${semOk?'verde':'rojo'}">${fmt(dev)}</span>`:`<span class="zero">—</span>`}</td>
-        <td>${dev>0?`<span class="dev-badge ${semOk?'ok':'warn'}">${pDev}%</span>`:`<span class="zero">—</span>`}</td>
-        <td style="font-weight:600;">${fmt(neto_real)}</td>
-      </tr>`;
+  // ── PESTAÑAS POR CATEGORÍA ──
+  catsSorted.forEach((cat,ci)=>{
+    const vends=(D.porMes[mes]||{})[cat]||{};
+    const byDay={};
+    const seg=D.seguimiento[mes]||{};
+    Object.keys(seg).forEach(f=>{
+      if((seg[f][cat]||0)>0) byDay[f]=seg[f][cat]||0;
     });
-    const tot_fac=rows.reduce((s,r)=>s+r[1],0);
-    const tot_neto=tot_fac-devTotCat;
-    html+=`<tr class="total-row"><td>Total ${CAT_LABEL[cat]}</td><td>${fmt(tot_fac)}</td>
-      <td>${fmt(devTotCat)}</td>
-      <td>${tot_fac>0?`<span class="dev-badge ${(devTotCat/tot_fac*100)<=3?'ok':'warn'}">${(devTotCat/tot_fac*100).toFixed(1)}%</span>`:'—'}</td>
-      <td>${fmt(tot_neto)}</td></tr>`;
-    html+=`</tbody></table></div>`;
-  });
-  html+=`</div>`;
+    const vendList=Object.entries(vends).sort((a,b)=>b[1]-a[1]);
+    const colors=['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4'];
+    if(cat==='Taller') colors.splice(0,6,'#92400E','#B45309','#D97706');
+    if(cat==='ML') colors.splice(0,6,'#1E40AF','#1D4ED8','#2563EB','#3B82F6');
+    if(cat==='AutoParts') colors.splice(0,6,'#6D28D9','#7C3AED','#8B5CF6');
+    const devTot=devC[cat]||0;
+    const pDev=totCat[cat]>0?(devTot/totCat[cat]*100).toFixed(1):'0.0';
+    const bySem={};
+    Object.keys(byDay).forEach(f=>{const s=getSemanaDelMes(f);if(s){if(!bySem[s])bySem[s]=[];bySem[s].push(f);}});
 
-  // ── TAB: MARCAS ──
-  const marcasMes = marcas[mes]||{};
-  html+=`<div class="tab-panel" id="panel-marcas">`;
-  html+=`<div class="sec-title">Marcas por vendedor — ${mesLabel(mes)}</div>`;
-  html+=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Vendedor</th><th>Marca</th><th>Facturado</th></tr></thead><tbody>`;
-  const allVends = Object.keys(marcasMes).sort((a,b)=>{
-    const ta=Object.values(marcasMes[a]).reduce((s,v)=>s+v,0);
-    const tb=Object.values(marcasMes[b]).reduce((s,v)=>s+v,0);
+    html+=`<div class="tab-panel${ci===0?' active':''}" id="panel-cat_${cat}">
+      <div class="mrow" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
+        <div class="mc"><div class="mc-lbl">Total facturado</div><div class="mc-val" style="color:${CAT_COL[cat]}">${fmt(totCat[cat])}</div></div>
+        <div class="mc"><div class="mc-lbl">Total devuelto</div><div class="mc-val">${fmt(devTot)}</div><div class="mc-sub"><span class="badge ${parseFloat(pDev)<=3?'ok':'warn'}">${pDev}%</span></div></div>
+        <div class="mc"><div class="mc-lbl">Neto real</div><div class="mc-val">${fmt(totCat[cat]-devTot)}</div></div>
+        <div class="mc"><div class="mc-lbl">Dias activos</div><div class="mc-val">${Object.keys(byDay).length}</div></div>
+        <div class="mc"><div class="mc-lbl">Promedio diario</div><div class="mc-val">${Object.keys(byDay).length?fmt(totCat[cat]/Object.keys(byDay).length):'—'}</div></div>
+      </div>
+      <div class="sec">Evolucion diaria</div>
+      <div class="chart-wrap"><canvas id="line_${cat}"></canvas></div>
+      <div class="sec">Por vendedor</div>
+      <div style="position:relative;width:100%;"><canvas id="hbar_${cat}"></canvas></div>
+      <div class="sec">Por vendedor — detalle</div>
+      <div class="tw"><table class="tbl">
+        <thead><tr><th>Vendedor</th><th>Facturado</th><th>Devuelto</th><th>% Dev</th><th>Neto</th></tr></thead>
+        <tbody>
+        ${vendList.map(([v,n])=>{
+          const dv=devVend(mes,v);const neto=n-dv;const p=n>0?(dv/n*100).toFixed(1):'0.0';const ok=parseFloat(p)<=3;
+          return`<tr><td>${v}</td><td>${fmt(n)}</td>
+            <td>${dv>0?`<span style="color:${ok?'var(--green)':'var(--red)'}">${fmt(dv)}</span>`:'<span class="zero">—</span>'}</td>
+            <td>${dv>0?`<span class="badge ${ok?'ok':'warn'}">${p}%</span>`:'<span class="zero">—</span>'}</td>
+            <td style="font-weight:600">${fmt(neto)}</td></tr>`;
+        }).join('')}
+        <tr class="tr-total"><td>Total</td><td>${fmt(totCat[cat])}</td><td>${fmt(devTot)}</td>
+          <td><span class="badge ${parseFloat(pDev)<=3?'ok':'warn'}">${pDev}%</span></td>
+          <td>${fmt(totCat[cat]-devTot)}</td></tr>
+        </tbody>
+      </table></div>
+      <div class="sec">Desglose semanal</div>`;
+
+    Object.entries(bySem).sort((a,b)=>+a[0]-+b[0]).forEach(([sem,fechas])=>{
+      const rango=getRangoSem(+sem,year,month);
+      const diasData={};
+      fechas.forEach(f=>{diasData[f]={};vendList.forEach(([v])=>{const sv=D.seguimiento[mes]?.[f]?.[cat]||0;if(sv>0)diasData[f][v]=sv;});});
+      // Rebuild per vendor per day
+      const vendDay={};
+      fechas.forEach(f=>{
+        Object.keys(seg[f]||{}).forEach(c2=>{if(c2===cat){
+          // need per-vendor breakdown — use porMes proportional approximation
+          vendList.forEach(([v,vn])=>{
+            if(!vendDay[v])vendDay[v]={};
+            vendDay[v][f]=(vendDay[v][f]||0);
+          });
+        }});
+      });
+      const semTot=fechas.reduce((s,f)=>s+(byDay[f]||0),0);
+      html+=`<div class="sem-blk">
+        <div class="sem-hdr"><b>Semana ${sem}</b><span>${rango}</span><span class="sem-tot" style="color:${CAT_COL[cat]}">${fmt(semTot)}</span></div>
+        <div class="legend" id="leg_${cat}_${sem}"></div>
+        <div style="position:relative;width:100%;"><canvas id="stk_${cat}_${sem}"></canvas></div>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+
+  // ── MARCAS ──
+  const marcasMes=D.marcasMes?.[mes]||{};
+  const allVends=Object.keys(marcasMes).sort((a,b)=>{
+    const ta=Object.values(marcasMes[a]).reduce((s,v)=>s+(v.neto||0),0);
+    const tb=Object.values(marcasMes[b]).reduce((s,v)=>s+(v.neto||0),0);
     return tb-ta;
   });
-  allVends.forEach(vend=>{
-    const vm=marcasMes[vend];
-    const vendTotal=Object.values(vm).reduce((s,v)=>s+v,0);
-    const topMarcas=Object.entries(vm).sort((a,b)=>b[1]-a[1]);
-    let first=true;
-    topMarcas.forEach(([marca,neto])=>{
-      if(neto<1)return;
-      html+=`<tr>
-        <td style="color:var(--muted);font-size:12px;">${first?`<strong style="color:var(--text);">${vend}</strong><br><span style="font-size:10px;">Total: ${fmt(vendTotal)}</span>`:''}` ;
-      first=false;
-      html+=`</td><td>${marca}</td><td>${fmt(neto)}</td></tr>`;
-    });
-  });
-  html+=`</tbody></table></div></div>`;
+  html+=`<div class="tab-panel" id="panel-marcas">
+    <div class="filter-row">
+      <label>Filtrar por vendedor:</label>
+      <select id="vendFilter" onchange="filtrarMarcas()">
+        <option value="">Todos</option>
+        ${allVends.map(v=>`<option value="${v}">${v}</option>`).join('')}
+      </select>
+    </div>
+    <div id="marcas-content"></div>
+  </div>`;
 
-  // ── TAB: DETAILING ──
-  const detMes = detailing[mes]||{tipo:{},instalador:{}};
-  html+=`<div class="tab-panel" id="panel-detailing">`;
-  html+=`<div class="sec-title">Por tipo de servicio</div>`;
-  const tipoLabels={PPF:'PPF',Ceramico:'Cerámico',PapelAhumado:'Papel Ahumado',Instalacion:'Instalación',Producto:'Producto'};
-  html+=`<div class="card-grid">`;
-  Object.entries(detMes.tipo).sort((a,b)=>b[1]-a[1]).forEach(([tipo,neto])=>{
-    html+=`<div class="card">
-      <div class="card-label">${tipoLabels[tipo]||tipo}</div>
-      <div class="card-value">${fmt(neto)}</div>
-    </div>`;
-  });
-  html+=`</div>`;
-  const totalDet=Object.values(detMes.tipo).reduce((s,v)=>s+v,0);
-  if(totalDet>0){
-    html+=`<div class="sec-title">Por instalador</div>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Instalador</th><th>Monto</th><th>% del total</th></tr></thead><tbody>`;
-    const instLabels={'INST-ALEX':'Alexander Pérez (Papel Ahumado)','INST-CDIN':'Carlos Dinis (Cerámico)','INST-ANTH':'Anthony Cárdenas (PPF/Cerámico)'};
-    Object.entries(detMes.instalador).sort((a,b)=>b[1]-a[1]).forEach(([inst,neto])=>{
-      html+=`<tr><td>${instLabels[inst]||inst}</td><td>${fmt(neto)}</td><td>${(neto/totalDet*100).toFixed(1)}%</td></tr>`;
-    });
-    html+=`<tr class="total-row"><td>Total Detailing</td><td>${fmt(totalDet)}</td><td>100%</td></tr>`;
-    html+=`</tbody></table></div>`;
-  }
-  html+=`</div>`;
+  // ── DETAILING ──
+  const detMes=D.detailing?.[mes]||{tipo:{},instalador:{}};
+  const totalDet=Object.values(detMes.tipo||{}).reduce((s,v)=>s+v,0);
+  const tipoLbl={PPF:'PPF',Ceramico:'Ceramico',PapelAhumado:'Papel Ahumado'};
+  html+=`<div class="tab-panel" id="panel-detailing">
+    <div class="sec">Por tipo de servicio</div>
+    <div class="card-grid">
+      ${Object.entries(detMes.tipo||{}).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`
+        <div class="card">
+          <div class="card-lbl">${tipoLbl[t]||t}</div>
+          <div class="card-val">${fmt(n)}</div>
+          <div class="card-sub">${totalDet>0?(n/totalDet*100).toFixed(1)+'% del total':''}</div>
+        </div>`).join('')}
+    </div>
+    <div class="sec">Por instalador</div>
+    <div class="tw"><table class="tbl">
+      <thead><tr><th>Instalador</th><th>Monto</th><th>% del total</th></tr></thead>
+      <tbody>
+        ${Object.entries(detMes.instalador||{}).sort((a,b)=>b[1]-a[1]).map(([inst,n])=>{
+          const lbl={'INST-ALEX':'Alexander Perez (Papel Ahumado)','INST-CDIN':'Carlos Dinis (Ceramico)','INST-ANTH':'Anthony Cardenas (PPF/Ceramico)'};
+          return`<tr><td>${lbl[inst]||inst}</td><td>${fmt(n)}</td><td>${totalDet>0?(n/totalDet*100).toFixed(1)+'%':'—'}</td></tr>`;
+        }).join('')}
+        <tr class="tr-total"><td>Total Detailing</td><td>${fmt(totalDet)}</td><td>100%</td></tr>
+      </tbody>
+    </table></div>
+  </div>`;
 
-  // ── TAB: AUDIO ──
-  const audioMes = audio[mes]||{};
-  html+=`<div class="tab-panel" id="panel-audio">`;
-  html+=`<div class="sec-title">CarAudio por marca — ${mesLabel(mes)}</div>`;
-  html+=`<div class="card-grid">`;
-  Object.entries(audioMes).sort((a,b)=>b[1]-a[1]).forEach(([marca,neto])=>{
-    html+=`<div class="card">
-      <div class="card-label">${marca}</div>
-      <div class="card-value">${fmt(neto)}</div>
-      <div class="card-sub">${(neto/Object.values(audioMes).reduce((s,v)=>s+v,0)*100).toFixed(1)}% del total audio</div>
-    </div>`;
-  });
-  html+=`</div>`;
-  const totalAudio=Object.values(audioMes).reduce((s,v)=>s+v,0);
-  html+=`<div class="metric" style="max-width:200px;margin-bottom:1rem;"><div class="metric-label">Total CarAudio</div><div class="metric-value">${fmt(totalAudio)}</div></div>`;
-  html+=`</div>`;
+  // ── CARAUDIO ──
+  const audioMes=D.audioMes?.[mes]||{};
+  const AUDIO_REAL=['JL AUDIO','KENWOOD','Kenwood','Rockford','Alpine','DS18','Pioneer','Boss Audio','STINGER','Stinger','BTL'];
+  const audioFiltrado={};
+  Object.entries(audioMes).forEach(([m,v])=>{if(AUDIO_REAL.includes(m)&&v.neto>0)audioFiltrado[m]=v;});
+  const totalAudio=Object.values(audioFiltrado).reduce((s,v)=>s+(v.neto||0),0);
+  const segAudio=D.seguimiento?.[mes]||{};
+  // Build audio daily from seguimiento — not available directly, show card-based view
+  html+=`<div class="tab-panel" id="panel-audio">
+    <div class="mc" style="max-width:220px;margin-bottom:1.5rem;">
+      <div class="mc-lbl">Total CarAudio</div>
+      <div class="mc-val" style="color:#1E40AF">${fmt(totalAudio)}</div>
+      <div class="mc-sub">${mesLabel(mes)}</div>
+    </div>
+    <div class="sec">Por marca</div>
+    <div class="card-grid">
+      ${Object.entries(audioFiltrado).sort((a,b)=>b[1].neto-a[1].neto).map(([marca,v])=>`
+        <div class="card">
+          <div class="card-lbl">${marca}</div>
+          <div class="card-val">${fmt(v.neto)}</div>
+          <div class="card-sub">${v.cant} unidades · ${totalAudio>0?(v.neto/totalAudio*100).toFixed(1)+'%':''}</div>
+        </div>`).join('')}
+    </div>
+    <div class="sec">Tabla detalle</div>
+    <div class="tw"><table class="tbl">
+      <thead><tr><th>Marca</th><th>Unidades</th><th>Facturado</th><th>% del total</th></tr></thead>
+      <tbody>
+        ${Object.entries(audioFiltrado).sort((a,b)=>b[1].neto-a[1].neto).map(([m,v])=>`
+          <tr><td>${m}</td><td class="l" style="text-align:right">${Math.round(v.cant)}</td><td>${fmt(v.neto)}</td>
+          <td>${totalAudio>0?(v.neto/totalAudio*100).toFixed(1)+'%':'—'}</td></tr>`).join('')}
+        <tr class="tr-total"><td>Total</td><td>${Object.values(audioFiltrado).reduce((s,v)=>s+Math.round(v.cant),0)}</td>
+          <td>${fmt(totalAudio)}</td><td>100%</td></tr>
+      </tbody>
+    </table></div>
+  </div>`;
 
-  // ── TAB: SEGUIMIENTO ──
-  const segMes = seg[mes]||{};
-  const VEND_COL={'Carlos Pellico':'Detal','Kimex Azpirichaga':'Detal','Karina Hernandez':'Detal',
-    'Carlos Santana':'Detal','Gustavo Urdaneta':'Detal','Santana Carlos':'Detal','Fernando Araujo':'Detal',
-    'CRM Detal':'Detal','Joel - Tienda':'Detal','Jonathan Chacon':'Detal',
-    'Frank':'Taller','Roger':'Taller',
-    'Mercado Libre':'ML','ML Adicional':'ML',
-    'CRM AutoParts':'AutoParts','Edgar Quiros':'AutoParts','Daniel AutoParts':'AutoParts'};
-  const SEG_COLS=['Detal','Taller','ML','AutoParts'];
-  const SEG_COLORS={Detal:'#0F766E',Taller:'#92400E',ML:'#1D4ED8',AutoParts:'#6D28D9'};
-  const fechasSeg=Object.keys(segMes).sort();
-  const bySem={};
-  fechasSeg.forEach(f=>{
-    const s=getSemanaDelMes(f); if(!s)return;
-    if(!bySem[s])bySem[s]=[];
-    bySem[s].push(f);
-  });
+  // ── SEGUIMIENTO ──
+  const segMes=D.seguimiento?.[mes]||{};
+  const SEG_COLS=catsSorted;
+  const fechasSeg=Object.keys(segMes).filter(f=>SEG_COLS.some(c=>(segMes[f][c]||0)>0)).sort();
+  const bySemSeg={};
+  fechasSeg.forEach(f=>{const s=getSemanaDelMes(f);if(s){if(!bySemSeg[s])bySemSeg[s]=[];bySemSeg[s].push(f);}});
 
-  html+=`<div class="tab-panel" id="panel-seguimiento">`;
-  html+=`<div class="tbl-wrap">`;
-  Object.entries(bySem).sort((a,b)=>+a[0]-+b[0]).forEach(([sem,fechas])=>{
+  html+=`<div class="tab-panel" id="panel-seguimiento"><div class="tw">`;
+  Object.entries(bySemSeg).sort((a,b)=>+a[0]-+b[0]).forEach(([sem,fechas])=>{
     const rango=getRangoSem(+sem,year,month);
     const semTots={};SEG_COLS.forEach(c=>semTots[c]=0);
     html+=`<div class="sem-blk">
-      <div class="sem-hdr">
-        <strong>Semana ${sem}</strong>
-        <span>${rango}</span>
+      <div class="sem-hdr"><b>Semana ${sem}</b><span>${rango}</span>
         <span class="sem-tot">${fmt(fechas.reduce((s,f)=>s+SEG_COLS.reduce((ss,c)=>ss+(segMes[f]?.[c]||0),0),0))}</span>
       </div>
-      <table class="tbl">
-        <thead><tr>
-          <th>Fecha</th>
-          ${SEG_COLS.map(c=>`<th style="color:${SEG_COLORS[c]}">${CAT_LABEL[c]}</th>`).join('')}
-          <th>Total</th>
-        </tr></thead><tbody>`;
+      <table class="tbl"><thead><tr>
+        <th>Fecha</th>
+        ${SEG_COLS.map(c=>`<th style="color:${CAT_COL[c]}">${CAT_LBL[c]}</th>`).join('')}
+        <th>Total</th>
+      </tr></thead><tbody>`;
     fechas.forEach(f=>{
-      const dayTot=SEG_COLS.reduce((s,c)=>s+(segMes[f]?.[c]||0),0);
+      const rowTot=SEG_COLS.reduce((s,c)=>s+(segMes[f]?.[c]||0),0);
       SEG_COLS.forEach(c=>semTots[c]+=(segMes[f]?.[c]||0));
       const dt=new Date(f+'T12:00:00');
-      const dLbl=(diasEs[dt.toLocaleDateString('en-US',{weekday:'short'}).slice(0,3)]||'?')+' '+dt.getDate();
-      const mLbl=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][dt.getMonth()];
-      html+=`<tr><td>${dLbl} ${mLbl}</td>
+      const dl=(diasEs[dt.toLocaleDateString('en-US',{weekday:'short'}).slice(0,3)]||'?')+' '+dt.getDate();
+      const ml=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][dt.getMonth()];
+      html+=`<tr><td>${dl} ${ml}</td>
         ${SEG_COLS.map(c=>{const v=segMes[f]?.[c]||0;return v>0?`<td>${fmt(v)}</td>`:`<td class="zero">—</td>`;}).join('')}
-        <td style="font-weight:600;">${fmt(dayTot)}</td></tr>`;
+        <td style="font-weight:600">${fmt(rowTot)}</td></tr>`;
     });
     const semTot=SEG_COLS.reduce((s,c)=>s+semTots[c],0);
-    html+=`<tr class="subtotal">
-      <td>Subtotal Sem ${sem}</td>
+    html+=`<tr class="tr-sub"><td>Subtotal Sem ${sem}</td>
       ${SEG_COLS.map(c=>`<td>${fmt(semTots[c])}</td>`).join('')}
-      <td>${fmt(semTot)}</td>
-    </tr></tbody></table></div>`;
+      <td>${fmt(semTot)}</td></tr>
+    </tbody></table></div>`;
   });
-  // Total mes
-  const mesRowTots={};SEG_COLS.forEach(c=>mesRowTots[c]=0);
-  fechasSeg.forEach(f=>SEG_COLS.forEach(c=>mesRowTots[c]+=(segMes[f]?.[c]||0)));
-  const mesRowTotal=SEG_COLS.reduce((s,c)=>s+mesRowTots[c],0);
-  html+=`<table class="tbl" style="margin-top:4px;">
-    <tbody><tr class="total-row">
-      <td>TOTAL ${mesLabel(mes).toUpperCase()}</td>
-      ${SEG_COLS.map(c=>`<td>${fmt(mesRowTots[c])}</td>`).join('')}
-      <td>${fmt(mesRowTotal)}</td>
-    </tr></tbody></table>`;
-  html+=`</div></div>`;
+  const mesTots={};SEG_COLS.forEach(c=>mesTots[c]=0);
+  fechasSeg.forEach(f=>SEG_COLS.forEach(c=>mesTots[c]+=(segMes[f]?.[c]||0)));
+  html+=`<table class="tbl" style="margin-top:4px;"><tbody><tr class="tr-total">
+    <td>TOTAL ${mesLabel(mes).toUpperCase()}</td>
+    ${SEG_COLS.map(c=>`<td>${fmt(mesTots[c])}</td>`).join('')}
+    <td>${fmt(SEG_COLS.reduce((s,c)=>s+mesTots[c],0))}</td>
+  </tr></tbody></table></div></div>`;
 
-  // ── TAB: DEVOLUCIONES ──
-  html+=`<div class="tab-panel" id="panel-devoluciones">`;
-  html+=`<div class="sec-title">Porcentaje de devolución por vendedor — ${mesLabel(mes)}</div>`;
-  html+=`<div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th>Vendedor</th><th>Facturado</th><th>Devuelto</th><th>% Dev</th><th>Meta 3%</th></tr></thead><tbody>`;
-
-  // Recopilar todos los vendedores con ventas
-  const allVendsDev = {};
-  CATS.forEach(cat=>{
-    const vends=(porMes[mes]||{})[cat]||{};
-    Object.entries(vends).forEach(([v,n])=>{
-      if(!allVendsDev[v])allVendsDev[v]={fac:0,dev:0};
-      allVendsDev[v].fac+=n;
-      allVendsDev[v].dev+=devMap[mes+'|'+v]||0;
-    });
+  // ── DEVOLUCIONES ──
+  const razones={};
+  Object.keys(D.devMap||{}).forEach(k=>{
+    if(k.startsWith(mes+'|RAZ|')){
+      const r=k.slice((mes+'|RAZ|').length);
+      razones[r]=(razones[r]||0)+D.devMap[k];
+    }
   });
+  const totalDevAll=D.devMap[mes]||0;
+  const razonColors=['#0F766E','#1E40AF','#6D28D9','#92400E','#B45309','#D97706','#059669','#DC2626'];
+  const razonEntries=Object.entries(razones).sort((a,b)=>b[1]-a[1]);
 
-  Object.entries(allVendsDev).sort((a,b)=>b[1].fac-a[1].fac).forEach(([vend,{fac,dev}])=>{
-    const p=fac>0?(dev/fac*100).toFixed(1):0;
+  html+=`<div class="tab-panel" id="panel-devoluciones">
+    <div class="sec">Total devuelto — ${mesLabel(mes)}</div>
+    <div class="mrow" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:1.5rem;">
+      <div class="mc"><div class="mc-lbl">Total devuelto</div><div class="mc-val" style="color:var(--red)">${fmt(totalDevAll)}</div></div>
+      <div class="mc"><div class="mc-lbl">Total facturado</div><div class="mc-val">${fmt(totalFac)}</div></div>
+      <div class="mc"><div class="mc-lbl">% global</div>
+        <div class="mc-val"><span class="badge ${totalFac>0&&(totalDevAll/totalFac*100)<=3?'ok':'warn'}">${totalFac>0?(totalDevAll/totalFac*100).toFixed(1)+'%':'—'}</span></div>
+      </div>
+    </div>`;
+
+  if(razonEntries.length>0){
+    html+=`<div class="sec">Por razon de devolucion</div>
+    <div class="donut-wrap">
+      <div class="donut-chart"><canvas id="donut_dev"></canvas></div>
+      <div class="donut-legend">
+        ${razonEntries.map(([r,n],i)=>`
+          <div class="donut-item">
+            <span class="donut-dot" style="background:${razonColors[i%razonColors.length]};"></span>
+            <span class="donut-label">${r}</span>
+            <span class="donut-pct">${fmt(n)} (${totalDevAll>0?(n/totalDevAll*100).toFixed(1)+'%':'—'})</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  html+=`<div class="sec">Por vendedor</div>
+    <div class="tw"><table class="tbl">
+      <thead><tr><th>Vendedor</th><th>Facturado</th><th>Devuelto</th><th>% Dev</th><th>Meta 3%</th></tr></thead>
+      <tbody>`;
+
+  const allVendsMap={};
+  CATS.forEach(c=>Object.entries((D.porMes[mes]||{})[c]||{}).forEach(([v,n])=>{
+    if(!allVendsMap[v])allVendsMap[v]={fac:0,dev:0};
+    allVendsMap[v].fac+=n;
+    allVendsMap[v].dev+=devVend(mes,v);
+  }));
+
+  Object.entries(allVendsMap).sort((a,b)=>b[1].fac-a[1].fac).forEach(([v,{fac,dev}])=>{
+    const p=fac>0?(dev/fac*100).toFixed(1):'0.0';
     const ok=parseFloat(p)<=3;
-    html+=`<tr>
-      <td>${vend}</td>
-      <td>${fmt(fac)}</td>
-      <td>${dev>0?fmt(dev):'<span class="zero">—</span>'}</td>
-      <td>${dev>0?`<span class="dev-badge ${ok?'ok':'warn'}">${p}%</span>`:'<span class="zero">—</span>'}</td>
-      <td>${dev>0?`<span class="${ok?'sem-verde':'sem-rojo'}">${ok?'✅ OK':'⚠️ Alto'}</span>`:'—'}</td>
-    </tr>`;
+    html+=`<tr><td>${v}</td><td>${fmt(fac)}</td>
+      <td>${dev>0?fmt(dev):`<span class="zero">—</span>`}</td>
+      <td>${dev>0?`<span class="badge ${ok?'ok':'warn'}">${p}%</span>`:`<span class="zero">—</span>`}</td>
+      <td>${dev>0?`<b style="color:${ok?'var(--green)':'var(--red)'}">${ok?'OK':'Alto'}</b>`:'—'}</td></tr>`;
   });
 
-  const totFac=Object.values(allVendsDev).reduce((s,v)=>s+v.fac,0);
-  const totDev=Object.values(allVendsDev).reduce((s,v)=>s+v.dev,0);
-  const totP=totFac>0?(totDev/totFac*100).toFixed(1):0;
-  const totOk=parseFloat(totP)<=3;
-  html+=`<tr class="total-row">
-    <td>Total</td><td>${fmt(totFac)}</td><td>${fmt(totDev)}</td>
-    <td><span class="dev-badge ${totOk?'ok':'warn'}">${totP}%</span></td>
-    <td><span class="${totOk?'sem-verde':'sem-rojo'}">${totOk?'✅ OK':'⚠️ Alto'}</span></td>
-  </tr>`;
-  html+=`</tbody></table></div>`;
+  const totFac2=Object.values(allVendsMap).reduce((s,v)=>s+v.fac,0);
+  const totDev2=Object.values(allVendsMap).reduce((s,v)=>s+v.dev,0);
+  const tp=totFac2>0?(totDev2/totFac2*100).toFixed(1):'0.0';
+  html+=`<tr class="tr-total"><td>Total</td><td>${fmt(totFac2)}</td><td>${fmt(totDev2)}</td>
+    <td><span class="badge ${parseFloat(tp)<=3?'ok':'warn'}">${tp}%</span></td>
+    <td><b style="color:${parseFloat(tp)<=3?'var(--green)':'var(--red)'}">${parseFloat(tp)<=3?'OK':'Alto'}</b></td>
+  </tr></tbody></table></div>`;
 
-  // Nota trimestral
-  const mesesDisp=(ALL_DATA.meses||[]).slice().reverse();
-  if(mesesDisp.length>=3){
-    html+=`<div class="sec-title">Promedio trimestral de devoluciones</div>
-    <div class="tbl-wrap"><table class="tbl">
+  // Trimestral
+  const mesesDisp=(D.meses||[]).slice().reverse();
+  if(mesesDisp.length>=2){
+    html+=`<div class="sec">Historico de devoluciones por vendedor</div>
+    <div class="tw"><table class="tbl">
       <thead><tr><th>Vendedor</th>
         ${mesesDisp.map(m=>`<th>${mesLabel(m)}</th>`).join('')}
         <th>Promedio</th>
       </tr></thead><tbody>`;
-    const allVendsTrims=new Set();
-    mesesDisp.forEach(m=>CATS.forEach(c=>Object.keys((ALL_DATA.porMes[m]||{})[c]||{}).forEach(v=>allVendsTrims.add(v))));
-    [...allVendsTrims].forEach(vend=>{
+    const allVHist=new Set();
+    mesesDisp.forEach(m=>CATS.forEach(c=>Object.keys((D.porMes[m]||{})[c]||{}).forEach(v=>allVHist.add(v))));
+    [...allVHist].forEach(v=>{
       const pcts=mesesDisp.map(m=>{
-        const fac=CATS.reduce((s,c)=>s+((ALL_DATA.porMes[m]||{})[c]?.[vend]||0),0);
-        const dev=ALL_DATA.devMap[m+'|'+vend]||0;
+        const fac=CATS.reduce((s,c)=>s+((D.porMes[m]||{})[c]?.[v]||0),0);
+        const dev=D.devMap[m+'|VEND|'+v]||0;
         return fac>0?(dev/fac*100):null;
       });
       const valid=pcts.filter(p=>p!==null);
       if(!valid.length)return;
       const avg=valid.reduce((s,p)=>s+p,0)/valid.length;
-      const avgOk=avg<=3;
-      html+=`<tr>
-        <td>${vend}</td>
-        ${pcts.map(p=>p===null?`<td class="zero">—</td>`:`<td><span class="dev-badge ${p<=3?'ok':'warn'}">${p.toFixed(1)}%</span></td>`).join('')}
-        <td><span class="dev-badge ${avgOk?'ok':'warn'}">${avg.toFixed(1)}%</span></td>
+      html+=`<tr><td>${v}</td>
+        ${pcts.map(p=>p===null?`<td class="zero">—</td>`:`<td><span class="badge ${p<=3?'ok':'warn'}">${p.toFixed(1)}%</span></td>`).join('')}
+        <td><span class="badge ${avg<=3?'ok':'warn'}">${avg.toFixed(1)}%</span></td>
       </tr>`;
     });
     html+=`</tbody></table></div>`;
@@ -550,6 +606,132 @@ function render(mes){
   html+=`</div>`;
 
   document.getElementById('app').innerHTML=html;
+
+  requestAnimationFrame(()=>{
+    // Charts por categoría
+    catsSorted.forEach(cat=>{
+      const byDay={};
+      const seg=D.seguimiento[mes]||{};
+      Object.keys(seg).forEach(f=>{if((seg[f][cat]||0)>0)byDay[f]=seg[f][cat];});
+      if(Object.keys(byDay).length) buildLine('line_'+cat,byDay,CAT_COL[cat]);
+
+      const vends=(D.porMes[mes]||{})[cat]||{};
+      const vendList=Object.entries(vends).sort((a,b)=>b[1]-a[1]);
+      if(vendList.length){
+        const shades=cat==='Detal'?['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4','#CCFBF1','#F0FDFA','#064E3B']:
+          cat==='Taller'?['#92400E','#B45309','#D97706']:
+          cat==='ML'?['#1E40AF','#1D4ED8','#2563EB','#3B82F6']:
+          ['#6D28D9','#7C3AED','#8B5CF6','#A78BFA'];
+        buildHBar('hbar_'+cat,vendList,shades);
+      }
+
+      // Stacked por semana
+      Object.keys(D.seguimiento[mes]||{}).forEach(f=>{
+        const s=getSemanaDelMes(f);
+        if(!s)return;
+      });
+      // Build vendDay stacked
+      const bySem2={};
+      Object.keys(byDay).forEach(f=>{const s=getSemanaDelMes(f);if(s){if(!bySem2[s])bySem2[s]=[];bySem2[s].push(f);}});
+      Object.entries(bySem2).forEach(([sem,fechas])=>{
+        const diasData={};
+        // Approximate vendor split per day using their monthly proportion
+        const totCatV=Object.values(vends).reduce((s,v)=>s+v,0);
+        fechas.forEach(f=>{
+          diasData[f]={};
+          const dayTot=byDay[f]||0;
+          if(totCatV>0){
+            Object.entries(vends).forEach(([v,vn])=>{
+              const prop=vn/totCatV;
+              diasData[f][v]=Math.round(dayTot*prop*100)/100;
+            });
+          }
+        });
+        const vendNames=vendList.map(x=>x[0]);
+        const shades=cat==='Detal'?['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4','#CCFBF1','#F0FDFA','#064E3B']:
+          cat==='Taller'?['#92400E','#B45309']:
+          cat==='ML'?['#1E40AF','#1D4ED8','#2563EB']:
+          ['#6D28D9','#7C3AED','#8B5CF6'];
+        const tots=fechas.map(f=>byDay[f]||0);
+        buildStacked(`stk_${cat}_${sem}`,`leg_${cat}_${sem}`,diasData,vendNames,shades,tots);
+      });
+    });
+
+    // Donut devoluciones
+    const razonEntries2=Object.entries(razones).sort((a,b)=>b[1]-a[1]);
+    const donutEl=document.getElementById('donut_dev');
+    if(donutEl&&razonEntries2.length){
+      const c=new Chart(donutEl,{type:'doughnut',
+        data:{labels:razonEntries2.map(x=>x[0]),datasets:[{data:razonEntries2.map(x=>x[1]),backgroundColor:razonColors,borderWidth:2,borderColor:'#fff'}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+          tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.parsed)} (${(ctx.parsed/totalDevAll*100).toFixed(1)}%)`}}},
+          cutout:'60%'}});
+      CHARTS.push(c);
+    }
+
+    // Render marcas content
+    filtrarMarcas();
+  });
+}
+
+function filtrarMarcas(){
+  const mes=document.getElementById('mesSelect').value;
+  if(!mes||!D)return;
+  const vendFilter=document.getElementById('vendFilter')?.value||'';
+  const marcasMes=D.marcasMes?.[mes]||{};
+  const allVends=vendFilter?[vendFilter]:Object.keys(marcasMes).sort((a,b)=>{
+    const ta=Object.values(marcasMes[a]).reduce((s,v)=>s+(v.neto||0),0);
+    const tb=Object.values(marcasMes[b]).reduce((s,v)=>s+(v.neto||0),0);
+    return tb-ta;
+  });
+
+  // Aggregate marcas
+  const marcaAgg={};
+  allVends.forEach(v=>{
+    Object.entries(marcasMes[v]||{}).forEach(([m,{neto,cant}])=>{
+      if(!marcaAgg[m])marcaAgg[m]={neto:0,cant:0,vends:{}};
+      marcaAgg[m].neto+=neto;
+      marcaAgg[m].cant+=cant;
+      marcaAgg[m].vends[v]=(marcaAgg[m].vends[v]||0)+neto;
+    });
+  });
+
+  const sorted=Object.entries(marcaAgg).sort((a,b)=>b[1].neto-a[1].neto);
+  const totalMarcas=sorted.reduce((s,[,v])=>s+v.neto,0);
+
+  const MARCA_COLORS=['#0F766E','#1E40AF','#6D28D9','#92400E','#B45309','#D97706','#059669','#DC2626','#0369A1','#0891B2','#065F46','#4C1D95','#78350F','#166534','#1E3A8A'];
+
+  let html=`<div class="tw"><table class="tbl">
+    <thead><tr>
+      <th>Marca</th>
+      <th>Unidades</th>
+      <th>Facturado</th>
+      <th>% del total</th>
+      ${vendFilter?'':`<th class="l">Vendedores</th>`}
+    </tr></thead><tbody>`;
+
+  sorted.forEach(([marca,{neto,cant,vends}],i)=>{
+    const color=MARCA_COLORS[i%MARCA_COLORS.length];
+    const pct=totalMarcas>0?(neto/totalMarcas*100).toFixed(1):0;
+    const vendStr=Object.entries(vends).sort((a,b)=>b[1]-a[1]).map(([v,n])=>`${v} (${fmt(n)})`).join(' · ');
+    html+=`<tr>
+      <td><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${color};margin-right:6px;vertical-align:middle;"></span>${marca}</td>
+      <td>${Math.round(cant)}</td>
+      <td>${fmt(neto)}</td>
+      <td><div style="display:flex;align-items:center;gap:6px;">
+        <div style="width:${Math.round(pct)}px;max-width:80px;height:6px;background:${color};border-radius:3px;"></div>
+        <span>${pct}%</span>
+      </div></td>
+      ${vendFilter?'':`<td class="l" style="font-size:11px;color:var(--muted);max-width:300px;white-space:normal;">${vendStr}</td>`}
+    </tr>`;
+  });
+
+  html+=`<tr class="tr-total"><td>Total</td><td>${sorted.reduce((s,[,v])=>s+Math.round(v.cant),0)}</td>
+    <td>${fmt(totalMarcas)}</td><td>100%</td>${vendFilter?'':''}</tr>
+  </tbody></table></div>`;
+
+  const el=document.getElementById('marcas-content');
+  if(el)el.innerHTML=html;
 }
 
 function switchTab(id,btn){
@@ -561,7 +743,7 @@ function switchTab(id,btn){
 
 function cambiarMes(){
   const mes=document.getElementById('mesSelect').value;
-  if(mes&&ALL_DATA)render(mes);
+  if(mes&&D)render(mes);
 }
 
 async function boot(){
@@ -570,20 +752,17 @@ async function boot(){
     if(!resp.ok)throw new Error('HTTP '+resp.status);
     const data=await resp.json();
     if(data.error)throw new Error(data.error);
-    ALL_DATA=data;
-
-    const meses=(data.meses||[]);
+    D=data;
+    const meses=D.meses||[];
     if(!meses.length)throw new Error('Sin datos');
-
     const sel=document.getElementById('mesSelect');
     sel.innerHTML=meses.map(m=>`<option value="${m}">${mesLabel(m)}</option>`).join('');
-
     document.getElementById('loading').style.display='none';
     document.getElementById('app').style.display='block';
     render(meses[0]);
   }catch(e){
     document.getElementById('loading').style.display='none';
-    const el=document.getElementById('error-msg');
+    const el=document.getElementById('err');
     el.style.display='block';
     el.textContent='Error: '+e.message;
   }
