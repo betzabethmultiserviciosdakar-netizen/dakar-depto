@@ -610,66 +610,10 @@ function render(mes){
 
   document.getElementById('app').innerHTML=html;
 
+  // Build charts for the first active tab only
   requestAnimationFrame(()=>{
-    // Charts por categoría
-    catsSorted.forEach(cat=>{
-      const byDay={};
-      const seg=D.seguimiento[mes]||{};
-      Object.keys(seg).forEach(f=>{
-        const v=seg[f]?.cat?.[cat]||0;
-        if(v>0)byDay[f]=v;
-      });
-      if(Object.keys(byDay).length) buildLine('line_'+cat,byDay,CAT_COL[cat]);
-
-      const vends=(D.porMes[mes]||{})[cat]||{};
-      const vendList=Object.entries(vends).sort((a,b)=>b[1]-a[1]);
-      if(vendList.length){
-        const shades=cat==='Detal'?['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4','#CCFBF1','#F0FDFA','#064E3B']:
-          cat==='Taller'?['#92400E','#B45309','#D97706']:
-          cat==='ML'?['#1E40AF','#1D4ED8','#2563EB','#3B82F6']:
-          ['#6D28D9','#7C3AED','#8B5CF6','#A78BFA'];
-        buildHBar('hbar_'+cat,vendList,shades);
-      }
-
-      // Stacked por semana
-      Object.keys(D.seguimiento[mes]||{}).forEach(f=>{
-        const s=getSemanaDelMes(f);
-        if(!s)return;
-      });
-      // Build vendDay stacked
-      const bySem2={};
-      Object.keys(byDay).forEach(f=>{const s=getSemanaDelMes(f);if(s){if(!bySem2[s])bySem2[s]=[];bySem2[s].push(f);}});
-      Object.entries(bySem2).forEach(([sem,fechas])=>{
-        const diasData={};
-        // Use real per-vendor data from seguimiento
-        fechas.forEach(f=>{
-          diasData[f]={};
-          const vendDay=(D.seguimiento[mes]?.[f]?.vend?.[cat])||{};
-          Object.entries(vendDay).forEach(([v,n])=>{ if(n>0)diasData[f][v]=n; });
-        });
-        const vendNames=vendList.map(x=>x[0]);
-        const shades=cat==='Detal'?['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4','#CCFBF1','#F0FDFA','#064E3B']:
-          cat==='Taller'?['#92400E','#B45309']:
-          cat==='ML'?['#1E40AF','#1D4ED8','#2563EB']:
-          ['#6D28D9','#7C3AED','#8B5CF6'];
-        const tots=fechas.map(f=>byDay[f]||0);
-        buildStacked(`stk_${cat}_${sem}`,`leg_${cat}_${sem}`,diasData,vendNames,shades,tots);
-      });
-    });
-
-    // Donut devoluciones
-    const razonEntries2=Object.entries(razones).sort((a,b)=>b[1]-a[1]);
-    const donutEl=document.getElementById('donut_dev');
-    if(donutEl&&razonEntries2.length){
-      const c=new Chart(donutEl,{type:'doughnut',
-        data:{labels:razonEntries2.map(x=>x[0]),datasets:[{data:razonEntries2.map(x=>x[1]),backgroundColor:razonColors,borderWidth:2,borderColor:'#fff'}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-          tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.parsed)} (${(ctx.parsed/totalDevAll*100).toFixed(1)}%)`}}},
-          cutout:'60%'}});
-      CHARTS.push(c);
-    }
-
-    // Render marcas content
+    const firstCat = catsSorted[0];
+    if(firstCat) buildChartsForTab('cat_'+firstCat);
     filtrarMarcas();
   });
 }
@@ -734,11 +678,84 @@ function filtrarMarcas(){
   if(el)el.innerHTML=html;
 }
 
+const BUILT_TABS = new Set();
+
+function buildChartsForTab(id){
+  if(BUILT_TABS.has(id)) return;
+  BUILT_TABS.add(id);
+  const mes = document.getElementById('mesSelect').value;
+  if(!mes||!D) return;
+  const[y,mo]=mes.split('-');
+  const year=+y, month=+mo-1;
+
+  if(id.startsWith('cat_')){
+    const cat = id.slice(4);
+    const seg = D.seguimiento[mes]||{};
+    const byDay={};
+    Object.keys(seg).forEach(f=>{ const v=seg[f]?.cat?.[cat]||0; if(v>0)byDay[f]=v; });
+    if(Object.keys(byDay).length) buildLine('line_'+cat, byDay, CAT_COL[cat]);
+
+    const vends=(D.porMes[mes]||{})[cat]||{};
+    const vendList=Object.entries(vends).sort((a,b)=>b[1]-a[1]);
+    if(vendList.length){
+      const shades=cat==='Detal'?['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4','#CCFBF1','#F0FDFA','#064E3B']:
+        cat==='Taller'?['#92400E','#B45309','#D97706']:
+        cat==='ML'?['#1E40AF','#1D4ED8','#2563EB','#3B82F6']:
+        ['#6D28D9','#7C3AED','#8B5CF6','#A78BFA'];
+      buildHBar('hbar_'+cat, vendList, shades);
+    }
+
+    // Stacked semanal
+    const bySem2={};
+    Object.keys(byDay).forEach(f=>{const s=getSemanaDelMes(f);if(s){if(!bySem2[s])bySem2[s]=[];bySem2[s].push(f);}});
+    Object.entries(bySem2).forEach(([sem,fechas])=>{
+      const diasData={};
+      fechas.forEach(f=>{
+        diasData[f]={};
+        const vendDay=(D.seguimiento[mes]?.[f]?.vend?.[cat])||{};
+        Object.entries(vendDay).forEach(([v,n])=>{ if(n>0)diasData[f][v]=n; });
+      });
+      const vendNames=vendList.map(x=>x[0]);
+      const shades=cat==='Detal'?['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4','#CCFBF1','#F0FDFA','#064E3B']:
+        cat==='Taller'?['#92400E','#B45309']:
+        cat==='ML'?['#1E40AF','#1D4ED8','#2563EB']:
+        ['#6D28D9','#7C3AED','#8B5CF6'];
+      const tots=fechas.map(f=>byDay[f]||0);
+      buildStacked(`stk_${cat}_${sem}`,`leg_${cat}_${sem}`,diasData,vendNames,shades,tots);
+    });
+  }
+
+  if(id==='devoluciones'){
+    const mes2=document.getElementById('mesSelect').value;
+    const razones={};
+    Object.keys(D.devMap||{}).forEach(k=>{
+      if(k.startsWith(mes2+'|RAZ|')){
+        const r=k.slice((mes2+'|RAZ|').length);
+        razones[r]=(razones[r]||0)+D.devMap[k];
+      }
+    });
+    const totalDevAll=D.devMap[mes2]||0;
+    const razonColors=['#0F766E','#1E40AF','#6D28D9','#92400E','#B45309','#D97706','#059669','#DC2626'];
+    const razonEntries2=Object.entries(razones).sort((a,b)=>b[1]-a[1]);
+    const donutEl=document.getElementById('donut_dev');
+    if(donutEl&&razonEntries2.length){
+      const c=new Chart(donutEl,{type:'doughnut',
+        data:{labels:razonEntries2.map(x=>x[0]),datasets:[{data:razonEntries2.map(x=>x[1]),backgroundColor:razonColors,borderWidth:2,borderColor:'#fff'}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.parsed)} (${(ctx.parsed/totalDevAll*100).toFixed(1)}%)`}}},
+          cutout:'60%'}});
+      CHARTS.push(c);
+    }
+  }
+}
+
 function switchTab(id,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('panel-'+id).classList.add('active');
+  // Build charts only when tab becomes visible
+  requestAnimationFrame(()=>buildChartsForTab(id));
 }
 
 function cambiarMes(){
