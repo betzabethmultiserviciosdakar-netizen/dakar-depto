@@ -54,7 +54,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .sec{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:1.75rem 0 .75rem;}
 
 /* Charts */
-.chart-wrap{position:relative;width:100%;height:230px;margin-bottom:1.5rem;}
+.chart-wrap{position:relative;width:100%;height:230px;margin-bottom:1.5rem;} .chart-wrap canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important;}
 .chart-wrap-sm{position:relative;width:100%;height:200px;}
 
 /* Tables */
@@ -137,7 +137,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   <div id="app" style="display:none;"></div>
 </div>
 <script>
-const DATA_URL='https://script.google.com/macros/s/AKfycbzTP0kAx2d2R2LxLfQ7zMT1ljgh71duFTANipZfZRdN_76qNw-u1XkQjqyt18bRy5Aa/exec';
+const DATA_URL='https://script.google.com/macros/s/AKfycbyr2aQl3RP29jwyixaVooukSi8UJz09UwWwQLLsS1jviJm5-sI1sINL1EEWiIvDJ7dD/exec';
 const CATS=['Detal','Taller','ML','AutoParts'];
 const CAT_LBL={Detal:'Detal',Taller:'Taller',ML:'Mercado Libre',AutoParts:'AutoParts'};
 const CAT_COL={Detal:'#0F766E',Taller:'#92400E',ML:'#1E40AF',AutoParts:'#6D28D9'};
@@ -318,7 +318,8 @@ function render(mes){
     const byDay={};
     const seg=D.seguimiento[mes]||{};
     Object.keys(seg).forEach(f=>{
-      if((seg[f][cat]||0)>0) byDay[f]=seg[f][cat]||0;
+      const v=seg[f]?.cat?.[cat]||seg[f]?.[cat]||0;
+      if(v>0) byDay[f]=v;
     });
     const vendList=Object.entries(vends).sort((a,b)=>b[1]-a[1]);
     const colors=['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4'];
@@ -341,7 +342,7 @@ function render(mes){
       <div class="sec">Evolucion diaria</div>
       <div class="chart-wrap"><canvas id="line_${cat}"></canvas></div>
       <div class="sec">Por vendedor</div>
-      <div style="position:relative;width:100%;"><canvas id="hbar_${cat}"></canvas></div>
+      <div style="position:relative;width:100%;height:200px;"><canvas id="hbar_${cat}"></canvas></div>
       <div class="sec">Por vendedor — detalle</div>
       <div class="tw"><table class="tbl">
         <thead><tr><th>Vendedor</th><th>Facturado</th><th>Devuelto</th><th>% Dev</th><th>Neto</th></tr></thead>
@@ -379,7 +380,7 @@ function render(mes){
       html+=`<div class="sem-blk">
         <div class="sem-hdr"><b>Semana ${sem}</b><span>${rango}</span><span class="sem-tot" style="color:${CAT_COL[cat]}">${fmt(semTot)}</span></div>
         <div class="legend" id="leg_${cat}_${sem}"></div>
-        <div style="position:relative;width:100%;"><canvas id="stk_${cat}_${sem}"></canvas></div>
+        <div style="position:relative;width:100%;height:220px;"><canvas id="stk_${cat}_${sem}"></canvas></div>
       </div>`;
     });
     html+=`</div>`;
@@ -468,8 +469,10 @@ function render(mes){
 
   // ── SEGUIMIENTO ──
   const segMes=D.seguimiento?.[mes]||{};
+  // Normalize seguimiento structure
+  const segCat=(f,c)=>segMes[f]?.cat?.[c]||segMes[f]?.[c]||0;
   const SEG_COLS=catsSorted;
-  const fechasSeg=Object.keys(segMes).filter(f=>SEG_COLS.some(c=>(segMes[f][c]||0)>0)).sort();
+  const fechasSeg=Object.keys(segMes).filter(f=>SEG_COLS.some(c=>segCat(f,c)>0)).sort();
   const bySemSeg={};
   fechasSeg.forEach(f=>{const s=getSemanaDelMes(f);if(s){if(!bySemSeg[s])bySemSeg[s]=[];bySemSeg[s].push(f);}});
 
@@ -487,13 +490,13 @@ function render(mes){
         <th>Total</th>
       </tr></thead><tbody>`;
     fechas.forEach(f=>{
-      const rowTot=SEG_COLS.reduce((s,c)=>s+(segMes[f]?.[c]||0),0);
-      SEG_COLS.forEach(c=>semTots[c]+=(segMes[f]?.[c]||0));
+      const rowTot=SEG_COLS.reduce((s,c)=>s+segCat(f,c),0);
+      SEG_COLS.forEach(c=>semTots[c]+=segCat(f,c));
       const dt=new Date(f+'T12:00:00');
       const dl=(diasEs[dt.toLocaleDateString('en-US',{weekday:'short'}).slice(0,3)]||'?')+' '+dt.getDate();
       const ml=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][dt.getMonth()];
       html+=`<tr><td>${dl} ${ml}</td>
-        ${SEG_COLS.map(c=>{const v=segMes[f]?.[c]||0;return v>0?`<td>${fmt(v)}</td>`:`<td class="zero">—</td>`;}).join('')}
+        ${SEG_COLS.map(c=>{const v=segCat(f,c);return v>0?`<td>${fmt(v)}</td>`:`<td class="zero">—</td>`;}).join('')}
         <td style="font-weight:600">${fmt(rowTot)}</td></tr>`;
     });
     const semTot=SEG_COLS.reduce((s,c)=>s+semTots[c],0);
@@ -503,7 +506,7 @@ function render(mes){
     </tbody></table></div>`;
   });
   const mesTots={};SEG_COLS.forEach(c=>mesTots[c]=0);
-  fechasSeg.forEach(f=>SEG_COLS.forEach(c=>mesTots[c]+=(segMes[f]?.[c]||0)));
+  fechasSeg.forEach(f=>SEG_COLS.forEach(c=>mesTots[c]+=segCat(f,c)));
   html+=`<table class="tbl" style="margin-top:4px;"><tbody><tr class="tr-total">
     <td>TOTAL ${mesLabel(mes).toUpperCase()}</td>
     ${SEG_COLS.map(c=>`<td>${fmt(mesTots[c])}</td>`).join('')}
@@ -635,17 +638,11 @@ function render(mes){
       Object.keys(byDay).forEach(f=>{const s=getSemanaDelMes(f);if(s){if(!bySem2[s])bySem2[s]=[];bySem2[s].push(f);}});
       Object.entries(bySem2).forEach(([sem,fechas])=>{
         const diasData={};
-        // Approximate vendor split per day using their monthly proportion
-        const totCatV=Object.values(vends).reduce((s,v)=>s+v,0);
+        // Use real per-vendor data from seguimiento
         fechas.forEach(f=>{
           diasData[f]={};
-          const dayTot=byDay[f]||0;
-          if(totCatV>0){
-            Object.entries(vends).forEach(([v,vn])=>{
-              const prop=vn/totCatV;
-              diasData[f][v]=Math.round(dayTot*prop*100)/100;
-            });
-          }
+          const vendDay=(D.seguimiento[mes]?.[f]?.vend?.[cat])||{};
+          Object.entries(vendDay).forEach(([v,n])=>{ diasData[f][v]=n; });
         });
         const vendNames=vendList.map(x=>x[0]);
         const shades=cat==='Detal'?['#0F766E','#0D9488','#14B8A6','#2DD4BF','#5EEAD4','#99F6E4','#CCFBF1','#F0FDFA','#064E3B']:
