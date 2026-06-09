@@ -534,6 +534,7 @@ function render(mes){
     catsSorted.forEach(cat=>{
       const byDay={};
       Object.keys(seg).forEach(f=>{const v=segVal(mes,f,cat);if(v>0)byDay[f]=v;});
+      console.log('cat:',cat,'byDay keys:',Object.keys(byDay).length,'line el:',document.getElementById('line_'+cat));
       if(Object.keys(byDay).length) buildLine('line_'+cat,byDay,CAT_COL[cat]);
 
       const vends=(porMes[mes]||{})[cat]||{};
