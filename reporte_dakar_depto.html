@@ -202,6 +202,7 @@ function buildLine(id,byDay,color){
 function buildHBar(id,items,colors){
   const el=document.getElementById(id);if(!el)return;
   const h=Math.max(180,items.length*42+60);
+  el.style.height=h+'px';
   el.parentElement.style.height=h+'px';
   const c=new Chart(el,{type:'bar',data:{labels:items.map(x=>x[0]),datasets:[{data:items.map(x=>x[1]),backgroundColor:colors,borderRadius:4,barPercentage:.75}]},
     options:{_hbar:true,indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:220}},
@@ -295,7 +296,7 @@ function render(mes){
       semHtml+=`<div class="sem-blk">
         <div class="sem-hdr"><b>Semana ${sem}</b><span>${rango}</span><span class="sem-tot" style="color:${CAT_COL[cat]}">${fmt(semTot)}</span></div>
         <div class="legend" id="leg_${cat}_${sem}"></div>
-        <div style="position:relative;width:100%;"><canvas id="stk_${cat}_${sem}"></canvas></div>
+        <div style="position:relative;width:100%;min-height:200px;"><canvas id="stk_${cat}_${sem}"></canvas></div>
       </div>`;
     });
 
@@ -310,7 +311,7 @@ function render(mes){
       <div class="sec">Evolucion diaria</div>
       <div style="position:relative;width:100%;height:220px;"><canvas id="line_${cat}"></canvas></div>
       <div class="sec">Por vendedor</div>
-      <div style="position:relative;width:100%;"><canvas id="hbar_${cat}"></canvas></div>
+      <div style="position:relative;width:100%;min-height:200px;"><canvas id="hbar_${cat}"></canvas></div>
       <div class="sec">Detalle por vendedor</div>
       <div class="tw"><table class="tbl">
         <thead><tr><th>Vendedor</th><th>Facturado</th><th>Devuelto</th><th>% Dev</th><th>Neto</th></tr></thead>
